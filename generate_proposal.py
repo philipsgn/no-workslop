@@ -78,14 +78,13 @@ def create_proposal_docx(filename="PROPOSAL_WORKGUARD.docx"):
         p.paragraph_format.space_after = Pt(24)
 
     def add_meta_box():
-        table = doc.add_table(rows=4, cols=2)
+        table = doc.add_table(rows=3, cols=2)
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
         table.autofit = False
 
         data = [
             ("Lĩnh vực nghiên cứu:", "Trí tuệ nhân tạo (AI), Xử lý ngôn ngữ tự nhiên (NLP), Kiểm định chất lượng tài liệu doanh nghiệp"),
             ("Mã đề tài / Dự án:", "CAPSTONE-2027-WORKGUARD"),
-            ("Thời gian thực hiện:", "08 Tuần (2 tháng)"),
             ("Phương pháp tiếp cận:", "Hybrid: Symbolic Rule Engine + Multilingual Embedding + NLI Cross-Encoder + LLM-as-a-Judge")
         ]
 
@@ -338,81 +337,32 @@ def create_proposal_docx(filename="PROPOSAL_WORKGUARD.docx"):
     add_bullet(" Tài liệu còn thiếu sót một số trường tác vụ (thiếu deadline, một số tuyên bố cần bổ sung số liệu), hệ thống trả về đề xuất để tác giả hoàn thiện.", bold_prefix="Điểm 50 - 79 [NEEDS REVISION - Cần chỉnh sửa]:")
     add_bullet(" Tài liệu chứa thông tin mâu thuẫn nghiêm trọng với tài liệu nguồn, sai lệch số liệu, hoàn toàn sáo rỗng hoặc thiếu tính khả thi; bị chặn lưu hành tự động.", bold_prefix="Điểm 0 - 49 [HIGH RISK - Rủi ro cao]:")
 
-    # 5. KẾ HOẠCH TRIỂN KHAI CHI TIẾT (8 TUẦN)
-    add_heading_1("5. Kế hoạch Triển khai Chi tiết trong 8 Tuần (Implementation Roadmap)")
-    doc.add_paragraph(
-        "Dự án được thiết kế để hoàn thành trong 8 tuần (tương đương 2 tháng), tuân thủ quy trình Agile/Scrum với các cột mốc bàn giao cụ thể:"
-    )
-
-    table_plan = doc.add_table(rows=9, cols=3)
-    table_plan.alignment = WD_TABLE_ALIGNMENT.CENTER
-    table_plan.autofit = False
-
-    plan_headers = ["Thời gian", "Nhiệm vụ Trọng tâm (Tasks)", "Kết quả Bàn giao (Deliverables)"]
-    for j, h in enumerate(plan_headers):
-        cell = table_plan.cell(0, j)
-        set_cell_background(cell, HEX_NAVY)
-        set_cell_margins(cell, 100, 100, 120, 120)
-        p = cell.paragraphs[0]
-        r = p.add_run(h)
-        r.font.bold = True
-        r.font.size = Pt(10)
-        r.font.color.rgb = WHITE
-
-    plan_data = [
-        ("Tuần 1", "Xác định Use Case, thu thập & tạo lập dataset chuẩn gồm 150-200 tài liệu (Progress reports, Memos, Proposals). Thiết kế Rubric v1.", "Bộ Dataset mẫu có gán nhãn + Đặc tả Rubric v1."),
-        ("Tuần 2", "Phát triển Ingestion Service: bóc tách định dạng DOCX, PDF, Markdown; làm sạch và chunking; cấu hình PostgreSQL & MinIO storage.", "Module Ingestion hoàn chỉnh, trích xuất text và metadata chuẩn xác."),
-        ("Tuần 3", "Xây dựng Rule Engine (phát hiện missing owner/deadline, filler patterns) và triển khai LLM Rubric Scorer với Qwen3-8B / API.", "Prototype CLI/API phân tích bước đầu, sinh điểm sơ bộ."),
-        ("Tuần 4", "Xây dựng Claim & Evidence Verifier (trích xuất claim, BGE-M3 embedding, Qdrant vector search, NLI entailment cross-encoder).", "Pipeline kiểm chứng dữ kiện hoạt động hoàn chỉnh, xác định mâu thuẫn."),
-        ("Tuần 5", "Gán nhãn chuyên gia trên tập kiểm thử (50-100 mẫu), đo độ đồng thuận (Cohen's Kappa), tinh chỉnh prompt và ngưỡng quyết định (thresholds).", "Báo cáo Đánh giá Độ chính xác v1 (Precision, Recall, F1, Agreement)."),
-        ("Tuần 6", "Phát triển giao diện người dùng (Web UI Dashboard) bằng React/Streamlit: upload file, hiển thị báo cáo, highlight câu lỗi, xuất PDF/JSON.", "Giao diện Web MVP tương tác trực quan cho người dùng cuối."),
-        ("Tuần 7", "Đóng gói toàn bộ hệ thống bằng Docker & Docker Compose; xây dựng REST API hoàn chỉnh, Webhook; thử nghiệm thực tế (Pilot Testing).", "Hệ thống đóng gói hoàn chỉnh, sẵn sàng triển khai trên hạ tầng máy chủ."),
-        ("Tuần 8", "Kiểm thử tải, tối ưu hiệu năng, hoàn thiện Báo cáo Luận văn Tốt nghiệp, Video Demo và Tài liệu Kỹ thuật hướng dẫn sử dụng.", "Báo cáo Luận văn Hoàn chỉnh + Source Code + Video Demo sản phẩm.")
-    ]
-
-    p_col_widths = [Inches(1.2), Inches(3.2), Inches(2.1)]
-    for i, row in enumerate(plan_data):
-        for j, val in enumerate(row):
-            cell = table_plan.cell(i+1, j)
-            cell.width = p_col_widths[j]
-            bg = "F9FAFC" if i % 2 == 1 else "FFFFFF"
-            set_cell_background(cell, bg)
-            set_cell_margins(cell, 80, 80, 100, 100)
-            p = cell.paragraphs[0]
-            r = p.add_run(val)
-            r.font.size = Pt(9.5)
-            if j == 0:
-                r.font.bold = True
-                r.font.color.rgb = NAVY
-
-    doc.add_paragraph().paragraph_format.space_after = Pt(12)
-
-    # 6. HIỆU QUẢ DỰ KIẾN & TÍNH KHẢ THI
-    add_heading_1("6. Hiệu quả Đề tài và Tính Khả thi (Feasibility & Expected Impact)")
+    # 5. HIỆU QUẢ DỰ KIẾN & TÍNH KHẢ THI
+    add_heading_1("5. Hiệu quả Đề tài và Tính Khả thi (Feasibility & Expected Impact)")
     
-    add_heading_2("6.1. Đóng góp về mặt Khoa học và Công nghệ")
+    add_heading_2("5.1. Đóng góp về mặt Khoa học và Công nghệ")
     add_bullet(" Đề xuất phương pháp luận mới trong việc kiểm định chất lượng nội dung do AI tạo ra, chuyển dịch trọng tâm từ 'phát hiện AI' sang 'đánh giá giá trị nghiệp vụ thực tế'.", bold_prefix="Phương pháp luận mới:")
     add_bullet(" Ứng dụng thành công kỹ thuật kết hợp giữa NLI (Natural Language Inference) và Dense Multilingual Retrieval (BGE-M3) để giải quyết bài toán Fact-checking trong tài liệu văn phòng Tiếng Việt.", bold_prefix="Làm chủ công nghệ NLP/LLM:")
 
-    add_heading_2("6.2. Hiệu quả Ứng dụng Thực tiễn trong Doanh nghiệp")
+    add_heading_2("5.2. Hiệu quả Ứng dụng Thực tiễn trong Doanh nghiệp")
     add_bullet(" Cắt giảm 60 - 80% thời gian của cấp quản lý trong việc đọc, rà soát và kiểm chứng tính xác thực của các báo cáo dự án.", bold_prefix="Tiết kiệm thời gian rà soát:")
     add_bullet(" Ngăn chặn kịp thời các rủi ro vận hành do nhân viên ra quyết định dựa trên những cam kết 'ảo', số liệu không có căn cứ do LLMs tự bịa ra.", bold_prefix="Giảm thiểu rủi ro vận hành:")
     add_bullet(" Giúp nhân viên tự hoàn thiện kỹ năng viết báo cáo thông qua các gợi ý chỉnh sửa cụ thể, trực quan.", bold_prefix="Nâng cao văn hóa làm việc:")
 
-    add_heading_2("6.3. Tính Khả thi Kỹ thuật & Hạ tầng (Feasibility Analysis)")
+    add_heading_2("5.3. Tính Khả thi Kỹ thuật & Hạ tầng (Feasibility Analysis)")
     add_bullet(" Đề tài tận dụng các thư viện mã nguồn mở hàng đầu (FastAPI, Celery, Spacy, BGE-M3, PyTorch), có cộng đồng lớn và độ ổn định cao.", bold_prefix="Nền tảng công nghệ sẵn sàng:")
     add_bullet(" Sử dụng mô hình nguồn mở tối ưu (Qwen3-8B hoặc Qwen2.5-7B) kết hợp lượng tử hóa (Quantization 4-bit/8-bit), hoàn toàn có khả năng chạy trên GPU tiêu chuẩn (Kaggle T4/P100, RTX 3090/4090) hoặc thông qua API chi phí thấp.", bold_prefix="Chi phí tính toán hợp lý:")
 
-    # 7. KẾT LUẬN & KIẾN NGHỊ
-    add_heading_1("7. Kết luận và Đề xuất (Conclusion & Recommendation)")
+    # 6. KẾT LUẬN & KIẾN NGHỊ
+    add_heading_1("6. Kết luận và Đề xuất (Conclusion & Recommendation)")
     doc.add_paragraph(
         "Đề tài "
     ).add_run("WorkGuard: Automated Fact-Checking and Workslop Detection in LLM-Generated Workplace Documents using Reference-Grounded Evidence Verification").font.bold = True
     p_end = doc.paragraphs[-1]
     p_end.add_run(
         " giải quyết trực diện một vấn nạn nhức nhối và cấp thiết nhất của kỷ nguyên Generative AI trong doanh nghiệp. "
-        "Với mục tiêu rõ ràng, cơ sở lý thuyết vững chắc, kiến trúc kỹ thuật hiện đại và lộ trình thực hiện 8 tuần chặt chẽ, "
-        "nhóm nghiên cứu cam kết hoàn thành đồ án đúng hạn, đem lại một sản phẩm có tính ứng dụng thực tiễn cao, đóng góp thiết thực cho cộng đồng nghiên cứu và ứng dụng CNTT."
+        "Với mục tiêu rõ ràng, cơ sở lý thuyết vững chắc, kiến trúc kỹ thuật hiện đại và phương pháp tiếp cận khả thi, "
+        "nhóm nghiên cứu tin tưởng đề tài sẽ mang lại một sản phẩm có tính ứng dụng thực tiễn cao, đóng góp thiết thực cho cộng đồng nghiên cứu và ứng dụng CNTT."
     )
 
     # Signature block
